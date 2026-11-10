@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electrotecnia A UNMDP - TP Nº 5: Resonancia y Lugar Geométrico</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        lab: {
+                            bg: '#0b1120',
+                            panel: '#111827',
+                            card: '#1e293b',
+                            border: '#334155',
+                            accent: '#38bdf8',
+                            res: '#10b981',
+                            warn: '#f59e0b',
+                            danger: '#ef4444'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b1120;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 999px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.18);
+        }
+        .slider-variable::-webkit-slider-thumb {
+            background: #10b981 !important;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.9) !important;
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            background: radial-gradient(circle at center, #111827 0%, #090d16 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Institutional Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-3 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20 border border-sky-400/30">
+                    <i class="fa-solid fa-compass-drafting text-xl text-white"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">UNMDP • Fac. de Ingeniería</span>
+                        <span class="text-xs font-mono text-slate-400">Electrotecnia A</span>
+                    </div>
+                    <h1 class="text-lg sm:text-xl font-bold text-white tracking-tight">
+                        Guía TP Nº 5: Resonancia y Lugar Geométrico <span class="text-sky-400 font-mono text-base font-normal">(R₁L // R₂C)</span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex flex-wrap items-center gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800 w-full lg:w-auto">
+                <button onclick="switchTab('simulador')" id="tab-btn-simulador" class="tab-btn flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2 bg-sky-600 text-white shadow-md shadow-sky-600/20">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Simulador 4 Casos (R₁L // R₂C)</span>
+                </button>
+                <button onclick="switchTab('ejercicios')" id="tab-btn-ejercicios" class="tab-btn flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/60">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                    <span>Ejercicios Resueltos (Guía Nº 5)</span>
+                </button>
+                <button onclick="switchTab('teoria')" id="tab-btn-teoria" class="tab-btn flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/60">
+                    <i class="fa-solid fa-square-root-variable"></i>
+                    <span>Fórmulas y Teoría de los 4 Casos</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-2xl border border-emerald-400/40 flex items-center gap-3 text-sm font-medium transition-all">
+        <i class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toast-msg">Acción completada</span>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-5">
+
+        <!-- ==========================================
+             TAB 1: SIMULADOR INTERACTIVO DE LOS 4 CASOS
+             ========================================== -->
+        <section id="tab-simulador" class="space-y-5">
+
+            <!-- Top Bar: Selector de los 4 Casos Prácticos + Presets de la Guía -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
+                    
+                    <!-- 4 Practical Cases Selector -->
+                    <div class="w-full xl:w-auto">
+                        <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-diagram-project text-sky-400"></i>
+                            <span>Seleccione el Caso Práctico de Variación (Rama 1: R₁+jX_L // Rama 2: R₂-jX_C):</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button onclick="setCase(1)" id="case-btn-1" class="case-btn px-3.5 py-2.5 rounded-xl border text-left transition-all flex flex-col justify-between bg-slate-800/70 border-slate-700 hover:border-sky-500/50">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="text-xs font-mono text-sky-400 font-bold">CASO 1</span>
+                                    <span class="w-2 h-2 rounded-full bg-sky-400 case-dot"></span>
+                                </div>
+                                <div class="text-sm font-bold text-white mt-0.5">R₁ Variable</div>
+                                <div class="text-[11px] text-slate-400">X_L, R₂, X_C fijos</div>
+                            </button>
+
+                            <button onclick="setCase(2)" id="case-btn-2" class="case-btn px-3.5 py-2.5 rounded-xl border text-left transition-all flex flex-col justify-between bg-slate-800/70 border-slate-700 hover:border-sky-500/50">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="text-xs font-mono text-sky-400 font-bold">CASO 2</span>
+                                    <span class="w-2 h-2 rounded-full bg-slate-600 case-dot"></span>
+                                </div>
+                                <div class="text-sm font-bold text-white mt-0.5">R₂ Variable</div>
+                                <div class="text-[11px] text-slate-400">R₁, X_L, X_C fijos</div>
+                            </button>
+
+                            <button onclick="setCase(3)" id="case-btn-3" class="case-btn px-3.5 py-2.5 rounded-xl border text-left transition-all flex flex-col justify-between bg-slate-800/70 border-slate-700 hover:border-sky-500/50">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="text-xs font-mono text-sky-400 font-bold">CASO 3</span>
+                                    <span class="w-2 h-2 rounded-full bg-slate-600 case-dot"></span>
+                                </div>
+                                <div class="text-sm font-bold text-white mt-0.5">L (X_L) Variable</div>
+                                <div class="text-[11px] text-slate-400">R₁, R₂, X_C fijos</div>
+                            </button>
+
+                            <button onclick="setCase(4)" id="case-btn-4" class="case-btn px-3.5 py-2.5 rounded-xl border text-left transition-all flex flex-col justify-between bg-slate-800/70 border-slate-700 hover:border-sky-500/50">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="text-xs font-mono text-sky-400 font-bold">CASO 4</span>
+                                    <span class="w-2 h-2 rounded-full bg-slate-600 case-dot"></span>
+                                </div>
+                                <div class="text-sm font-bold text-white mt-0.5">C (X_C) Variable</div>
+                                <div class="text-[11px] text-slate-400">R₁, X_L, R₂ fijos</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Presets from TP5 Guide -->
+                    <div class="w-full xl:w-auto border-t xl:border-t-0 xl:border-l border-slate-800 pt-3 xl:pt-0 xl:pl-5">
+                        <div class="text-xs font-mono uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-bolt text-amber-400"></i>
+                            <span>Cargar Ejercicios de la Guía TP 5:</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button onclick="loadPreset('ej10')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 hover:border-sky-500/40 text-xs font-mono text-slate-200 border border-slate-700 transition">
+                                Ej. 10 (L var - 2 Res.)
+                            </button>
+                            <button onclick="loadPreset('ej11')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 hover:border-sky-500/40 text-xs font-mono text-slate-200 border border-slate-700 transition">
+                                Ej. 11 (C var)
+                            </button>
+                            <button onclick="loadPreset('ej15')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 hover:border-sky-500/40 text-xs font-mono text-slate-200 border border-slate-700 transition">
+                                Ej. 15 (R₁ var)
+                            </button>
+                            <button onclick="loadPreset('ej17')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 hover:border-sky-500/40 text-xs font-mono text-slate-200 border border-slate-700 transition">
+                                Ej. 17 (C var)
+                            </button>
+                            <button onclick="loadPreset('ej18')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 hover:border-sky-500/40 text-xs font-mono text-slate-200 border border-slate-700 transition">
+                                Ej. 18 (C var Tangente)
+                            </button>
+                            <button onclick="loadPreset('caso2_2res')" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-sky-500/20 hover:border-sky-500/40 text-xs font-mono text-slate-200 border border-slate-700 transition">
+                                Caso 2 (R₂ var - 2 Res.)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Workspace Grid: Left Controls & Schematic | Center/Right Dual Canvas & Resonance Analysis -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+                <!-- LEFT COLUMN (4 cols): Active Variable Control, Fixed Parameters & Dynamic SVG Circuit -->
+                <div class="lg:col-span-4 space-y-5">
+
+                    <!-- Highlighted Variable Element Control Card -->
+                    <div class="bg-gradient-to-b from-emerald-950/40 to-slate-900 border border-emerald-500/40 rounded-2xl p-4 shadow-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrows-left-right"></i> Parámetro Variable Activo
+                            </span>
+                            <span id="var-reactance-equiv" class="text-xs font-mono text-slate-300">L = 2.00 mH</span>
+                        </div>
+
+                        <div class="flex items-baseline justify-between my-2">
+                            <label id="var-label-title" class="text-base font-bold text-white">Resistencia R₁ (Rama RL)</label>
+                            <div class="flex items-center gap-1">
+                                <input type="number" id="var-num-input" step="0.05" min="0" max="100"
+                                    class="w-24 bg-slate-950 border border-emerald-500/50 rounded-lg px-2 py-1 text-right font-mono text-base font-bold text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    oninput="onVariableInput(this.value)">
+                                <span class="font-mono text-sm text-slate-300">Ω</span>
+                            </div>
+                        </div>
+
+                        <input type="range" id="var-slider" min="0" max="40" step="0.02" value="5"
+                            class="w-full slider-variable my-2" oninput="onVariableSlider(this.value)">
+
+                        <div class="flex justify-between text-[11px] font-mono text-slate-400 mb-3">
+                            <span>0 Ω (Corto)</span>
+                            <span id="var-slider-mid">20 Ω</span>
+                            <span id="var-slider-max">40 Ω (→ ∞)</span>
+                        </div>
+
+                        <!-- Jump to Resonance Buttons -->
+                        <div class="pt-2 border-t border-slate-800/80">
+                            <div class="text-[11px] font-mono text-slate-400 mb-2 flex items-center justify-between">
+                                <span>Puntos de Resonancia (Im[Y_T] = 0):</span>
+                                <span id="res-status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">2 Raíces Reales</span>
+                            </div>
+                            <div id="res-jump-buttons" class="grid grid-cols-2 gap-2">
+                                <!-- Populated dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fixed Circuit Parameters Card -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3.5">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <h3 class="text-xs font-mono uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                                <i class="fa-solid fa-Microchip text-sky-400"></i> Parámetros del Circuito
+                            </h3>
+                            <span class="text-[11px] font-mono text-slate-400">V = |V|∠0°</span>
+                        </div>
+
+                        <!-- Source V and Omega -->
+                        <div class="grid grid-cols-2 gap-3 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400 font-mono">Tensión |V|:</span>
+                                    <span class="font-mono font-semibold text-sky-400"><span id="val-V">100</span> V</span>
+                                </div>
+                                <input type="range" id="param-V" min="10" max="250" step="5" value="100" oninput="updateFixedParam('V', this.value)" class="w-full">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-slate-400 font-mono">Pulsación ω:</span>
+                                    <span class="font-mono font-semibold text-sky-400"><span id="val-w">5000</span> r/s</span>
+                                </div>
+                                <input type="range" id="param-w" min="500" max="10000" step="100" value="5000" oninput="updateFixedParam('w', this.value)" class="w-full">
+                            </div>
+                        </div>
+
+                        <!-- Branch 1: R1 and XL -->
+                        <div class="space-y-2.5 pt-1">
+                            <div class="text-xs font-semibold text-amber-400 font-mono flex items-center justify-between">
+                                <span>RAMA 1 (Inductiva: R₁ + jX_L)</span>
+                                <span id="z1-summary" class="text-slate-300">Z₁ = 5.0 + j10.0 Ω</span>
+                            </div>
+
+                            <div id="ctrl-R1" class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                                <div class="flex justify-between items-center text-xs mb-1">
+                                    <span class="text-slate-300 font-mono">Resistencia R₁:</span>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" id="num-R1" step="0.1" min="0.1" max="50" value="4" onchange="updateFixedParam('R1', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-right font-mono text-xs text-white">
+                                        <span class="font-mono text-slate-400">Ω</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="param-R1" min="0.2" max="30" step="0.1" value="4" oninput="updateFixedParam('R1', this.value)" class="w-full">
+                            </div>
+
+                            <div id="ctrl-XL" class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                                <div class="flex justify-between items-center text-xs mb-1">
+                                    <span class="text-slate-300 font-mono">Reactancia X_L <span id="lbl-L-mH" class="text-[10px] text-slate-400">(L=2.0mH)</span>:</span>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" id="num-XL" step="0.1" min="0.1" max="50" value="10" onchange="updateFixedParam('XL', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-right font-mono text-xs text-white">
+                                        <span class="font-mono text-slate-400">Ω</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="param-XL" min="0.2" max="30" step="0.1" value="10" oninput="updateFixedParam('XL', this.value)" class="w-full">
+                            </div>
+                        </div>
+
+                        <!-- Branch 2: R2 and XC -->
+                        <div class="space-y-2.5 pt-1 border-t border-slate-800/80">
+                            <div class="text-xs font-semibold text-cyan-400 font-mono flex items-center justify-between">
+                                <span>RAMA 2 (Capacitiva: R₂ - jX_C)</span>
+                                <span id="z2-summary" class="text-slate-300">Z₂ = 4.0 - j5.0 Ω</span>
+                            </div>
+
+                            <div id="ctrl-R2" class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                                <div class="flex justify-between items-center text-xs mb-1">
+                                    <span class="text-slate-300 font-mono">Resistencia R₂:</span>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" id="num-R2" step="0.1" min="0.1" max="50" value="4" onchange="updateFixedParam('R2', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-right font-mono text-xs text-white">
+                                        <span class="font-mono text-slate-400">Ω</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="param-R2" min="0.2" max="30" step="0.1" value="4" oninput="updateFixedParam('R2', this.value)" class="w-full">
+                            </div>
+
+                            <div id="ctrl-XC" class="bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                                <div class="flex justify-between items-center text-xs mb-1">
+                                    <span class="text-slate-300 font-mono">Reactancia X_C <span id="lbl-C-uF" class="text-[10px] text-slate-400">(C=40µF)</span>:</span>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" id="num-XC" step="0.1" min="0.1" max="50" value="5" onchange="updateFixedParam('XC', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-right font-mono text-xs text-white">
+                                        <span class="font-mono text-slate-400">Ω</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="param-XC" min="0.2" max="30" step="0.1" value="5" oninput="updateFixedParam('XC', this.value)" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Interactive Circuit Schematic SVG -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                                <i class="fa-solid fa-project-diagram text-emerald-400"></i> Esquema Eléctrico Dinámico
+                            </span>
+                            <span id="schematic-case-tag" class="text-[11px] font-mono text-emerald-400">Flecha = Elemento Variable</span>
+                        </div>
+                        <div class="bg-slate-950 rounded-xl border border-slate-800/90 p-2 flex items-center justify-center">
+                            <svg id="circuit-svg" viewBox="0 0 380 230" class="w-full h-auto max-h-[230px]">
+                                <!-- Wires -->
+                                <path d="M 45 115 L 45 30 L 310 30 M 45 115 L 45 200 L 310 200" stroke="#64748b" stroke-width="2.2" fill="none"/>
+                                <line x1="185" y1="30" x2="185" y2="62" stroke="#64748b" stroke-width="2.2"/>
+                                <line x1="185" y1="108" x2="185" y2="132" stroke="#64748b" stroke-width="2.2"/>
+                                <line x1="185" y1="176" x2="185" y2="200" stroke="#64748b" stroke-width="2.2"/>
+
+                                <line x1="310" y1="30" x2="310" y2="62" stroke="#64748b" stroke-width="2.2"/>
+                                <line x1="310" y1="108" x2="310" y2="142" stroke="#64748b" stroke-width="2.2"/>
+                                <line x1="310" y1="162" x2="310" y2="200" stroke="#64748b" stroke-width="2.2"/>
+
+                                <!-- Nodes -->
+                                <circle cx="185" cy="30" r="3.5" fill="#cbd5e1"/>
+                                <circle cx="185" cy="200" r="3.5" fill="#cbd5e1"/>
+
+                                <!-- AC Voltage Source -->
+                                <circle cx="45" cy="115" r="22" fill="#0f172a" stroke="#38bdf8" stroke-width="2.2"/>
+                                <path d="M 35 115 Q 40 105 45 115 T 55 115" stroke="#38bdf8" stroke-width="2" fill="none"/>
+                                <text x="12" y="90" fill="#38bdf8" font-family="JetBrains Mono" font-size="11" font-weight="bold" id="svg-V">100∠0°V</text>
+
+                                <!-- Total Current Arrow IT -->
+                                <path d="M 85 22 L 125 22" stroke="#10b981" stroke-width="2.2" marker-end="url(#arrow-it)"/>
+                                <text x="95" y="16" fill="#10b981" font-family="JetBrains Mono" font-size="11" font-weight="bold">I_T</text>
+
+                                <!-- Branch 1 Current Arrow I1 -->
+                                <path d="M 168 40 L 168 58" stroke="#f59e0b" stroke-width="1.8"/>
+                                <polygon points="168,62 164,55 172,55" fill="#f59e0b"/>
+                                <text x="145" y="53" fill="#f59e0b" font-family="JetBrains Mono" font-size="11" font-weight="bold">I₁</text>
+
+                                <!-- Branch 2 Current Arrow I2 -->
+                                <path d="M 293 40 L 293 58" stroke="#06b6d4" stroke-width="1.8"/>
+                                <polygon points="293,62 289,55 297,55" fill="#06b6d4"/>
+                                <text x="270" y="53" fill="#06b6d4" font-family="JetBrains Mono" font-size="11" font-weight="bold">I₂</text>
+
+                                <!-- R1 Zigzag -->
+                                <path id="svg-comp-R1" d="M 185 62 L 177 67 L 193 75 L 177 83 L 193 91 L 177 99 L 185 104 L 185 108" stroke="#f59e0b" stroke-width="2.4" fill="none"/>
+                                <text x="200" y="88" fill="#fde68a" font-family="JetBrains Mono" font-size="11" id="svg-txt-R1">R₁=4Ω</text>
+                                <!-- Variable arrow for R1 -->
+                                <g id="var-arrow-1" class="hidden">
+                                    <line x1="165" y1="102" x2="205" y2="66" stroke="#10b981" stroke-width="2.2"/>
+                                    <polygon points="208,63 199,66 204,72" fill="#10b981"/>
+                                </g>
+
+                                <!-- XL Coil -->
+                                <path id="svg-comp-XL" d="M 185 132 C 198 132 198 143 185 143 C 198 143 198 154 185 154 C 198 154 198 165 185 165 C 198 165 198 176 185 176" stroke="#f59e0b" stroke-width="2.4" fill="none"/>
+                                <text x="200" y="158" fill="#fde68a" font-family="JetBrains Mono" font-size="11" id="svg-txt-XL">j10Ω</text>
+                                <!-- Variable arrow for XL -->
+                                <g id="var-arrow-3" class="hidden">
+                                    <line x1="165" y1="172" x2="205" y2="136" stroke="#10b981" stroke-width="2.2"/>
+                                    <polygon points="208,133 199,136 204,142" fill="#10b981"/>
+                                </g>
+
+                                <!-- R2 Zigzag -->
+                                <path id="svg-comp-R2" d="M 310 62 L 302 67 L 318 75 L 302 83 L 318 91 L 302 99 L 310 104 L 310 108" stroke="#06b6d4" stroke-width="2.4" fill="none"/>
+                                <text x="324" y="88" fill="#a5f3fc" font-family="JetBrains Mono" font-size="11" id="svg-txt-R2">R₂=4Ω</text>
+                                <!-- Variable arrow for R2 -->
+                                <g id="var-arrow-2" class="hidden">
+                                    <line x1="290" y1="102" x2="330" y2="66" stroke="#10b981" stroke-width="2.2"/>
+                                    <polygon points="333,63 324,66 329,72" fill="#10b981"/>
+                                </g>
+
+                                <!-- XC Capacitor Plates -->
+                                <line id="svg-comp-XC1" x1="294" y1="144" x2="326" y2="144" stroke="#06b6d4" stroke-width="2.8"/>
+                                <line id="svg-comp-XC2" x1="294" y1="158" x2="326" y2="158" stroke="#06b6d4" stroke-width="2.8"/>
+                                <text x="330" y="155" fill="#a5f3fc" font-family="JetBrains Mono" font-size="11" id="svg-txt-XC">-j5Ω</text>
+                                <!-- Variable arrow for XC -->
+                                <g id="var-arrow-4" class="hidden">
+                                    <line x1="290" y1="170" x2="330" y2="132" stroke="#10b981" stroke-width="2.2"/>
+                                    <polygon points="333,129 324,132 329,138" fill="#10b981"/>
+                                </g>
+
+                                <defs>
+                                    <marker id="arrow-it" markerWidth="8" markerHeight="8" refX="5" refY="3" orient="auto">
+                                        <polygon points="0 0, 7 3, 0 6" fill="#10b981"/>
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN (8 cols): Dual Interactive Canvas + Polar/Cartesian Readouts & Resonance Explanation -->
+                <div class="lg:col-span-8 space-y-5">
+
+                    <!-- Dual Canvas Grid -->
+                    <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
+                        <!-- CANVAS 1: Diagrama de Lugar Geométrico (Plano Complejo) -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col shadow-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Lugar Geométrico Polar / Cartesiano
+                                    </h3>
+                                    <p class="text-[11px] text-slate-400 font-mono">Semicírculo de Admitancia Y_T y Corriente I_T (Eje Real = Dirección de V)</p>
+                                </div>
+                                <!-- Scale mode toggle -->
+                                <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs font-mono">
+                                    <button onclick="setLocusMode('I')" id="mode-btn-I" class="px-2.5 py-1 rounded bg-sky-600 text-white font-semibold transition">Corriente I [A]</button>
+                                    <button onclick="setLocusMode('Y')" id="mode-btn-Y" class="px-2.5 py-1 rounded text-slate-400 hover:text-white transition">Admitancia Y [S]</button>
+                                </div>
+                            </div>
+
+                            <div class="canvas-container rounded-xl border border-slate-800 overflow-hidden flex-1 min-h-[360px]">
+                                <canvas id="canvas-locus" class="w-full h-[360px] block cursor-crosshair"></canvas>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-800/80 text-[11px] font-mono">
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <span class="flex items-center gap-1.5 text-amber-400"><span class="w-3 h-0.5 bg-amber-400 inline-block"></span>Fasor Rama 1 (I₁)</span>
+                                    <span class="flex items-center gap-1.5 text-cyan-400"><span class="w-3 h-0.5 bg-cyan-400 inline-block"></span>Fasor Rama 2 (I₂)</span>
+                                    <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-3 h-1 bg-emerald-400 inline-block rounded"></span>Lugar de I_T (Total)</span>
+                                </div>
+                                <span class="flex items-center gap-1 text-rose-400 font-semibold">
+                                    <i class="fa-solid fa-bullseye"></i> Círculo Rojo = Resonancia (φ = 0°)
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- CANVAS 2: Respuesta Paramétrica vs Elemento Variable -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col shadow-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <div>
+                                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                                        <i class="fa-solid fa-chart-line text-sky-400"></i>
+                                        Curvas en Función del Parámetro Variable
+                                    </h3>
+                                    <p id="curve-subtitle" class="text-[11px] text-slate-400 font-mono">Cruce por cero de Im(I_T) = Resonancia en fase con V</p>
+                                </div>
+                                <span id="current-op-badge" class="text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-emerald-400">
+                                    φ = 0.0°
+                                </span>
+                            </div>
+
+                            <div class="canvas-container rounded-xl border border-slate-800 overflow-hidden flex-1 min-h-[360px]">
+                                <canvas id="canvas-curves" class="w-full h-[360px] block cursor-pointer"></canvas>
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-800/80 text-[11px] font-mono">
+                                <div class="flex flex-wrap items-center gap-3">
+                                    <span class="flex items-center gap-1.5 text-emerald-400"><span class="w-3 h-0.5 bg-emerald-400 inline-block"></span>Módulo |I_T| [A]</span>
+                                    <span class="flex items-center gap-1.5 text-fuchsia-400"><span class="w-3 h-0.5 bg-fuchsia-400 inline-block"></span>Parte Imag. Im(I_T) [A]</span>
+                                    <span class="flex items-center gap-1.5 text-sky-400"><span class="w-3 h-0.5 bg-sky-400 inline-block"></span>Fase φ [°]</span>
+                                </div>
+                                <span class="text-slate-400">Click en la gráfica para mover el cursor</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Analytical Diagnosis of Resonance for Current Case -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wide font-mono">Análisis de Puntos de Resonancia y Geometría del Semicírculo</h3>
+                            </div>
+                            <span id="geometric-radius-info" class="text-xs font-mono text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-lg border border-sky-500/20">
+                                Diámetro Semicírculo = V / X_fijo
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pt-3 items-center">
+                            <div class="md:col-span-7 space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed" id="resonance-explanation-box">
+                                <!-- Filled dynamically by JS -->
+                            </div>
+                            <div class="md:col-span-5 bg-slate-950/90 border border-slate-800 rounded-xl p-3 font-mono text-xs space-y-1.5" id="resonance-math-box">
+                                <!-- Filled dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Complete Polar & Cartesian Fascial Readout Table (Format: Polar (Cartesian)) -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                <i class="fa-solid fa-table-list text-sky-400"></i>
+                                Magnitudes Complejas en Tiempo Real — Formato Polar (Cartesiano)
+                            </h3>
+                            <span class="text-[11px] font-mono text-slate-400">Convención: Y = G + jB = 1 / (R + jX)</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs">
+                            <!-- Branch 1 Box -->
+                            <div class="bg-slate-950/70 border border-amber-500/30 rounded-xl p-3 space-y-1.5">
+                                <div class="text-amber-400 font-bold border-b border-slate-800 pb-1 flex justify-between">
+                                    <span>RAMA 1 (R₁ + jX_L)</span>
+                                    <span>Inductiva</span>
+                                </div>
+                                <div class="flex justify-between"><span class="text-slate-400">Z₁:</span> <span id="read-Z1" class="text-slate-100">10.77 ∠ 68.20° Ω (4.00 + j10.00 Ω)</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Y₁:</span> <span id="read-Y1" class="text-slate-100">0.093 ∠ -68.20° S (0.035 - j0.086 S)</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">I₁:</span> <span id="read-I1" class="text-amber-300 font-semibold">9.28 ∠ -68.20° A (3.45 - j8.62 A)</span></div>
+                            </div>
+
+                            <!-- Branch 2 Box -->
+                            <div class="bg-slate-950/70 border border-cyan-500/30 rounded-xl p-3 space-y-1.5">
+                                <div class="text-cyan-400 font-bold border-b border-slate-800 pb-1 flex justify-between">
+                                    <span>RAMA 2 (R₂ - jX_C)</span>
+                                    <span>Capacitiva</span>
+                                </div>
+                                <div class="flex justify-between"><span class="text-slate-400">Z₂:</span> <span id="read-Z2" class="text-slate-100">6.40 ∠ -51.34° Ω (4.00 - j5.00 Ω)</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Y₂:</span> <span id="read-Y2" class="text-slate-100">0.156 ∠ 51.34° S (0.098 + j0.122 S)</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">I₂:</span> <span id="read-I2" class="text-cyan-300 font-semibold">15.62 ∠ 51.34° A (9.76 + j12.20 A)</span></div>
+                            </div>
+
+                            <!-- Total Equivalent Box -->
+                            <div class="bg-slate-950/70 border border-emerald-500/40 rounded-xl p-3 space-y-1.5">
+                                <div class="text-emerald-400 font-bold border-b border-slate-800 pb-1 flex justify-between">
+                                    <span>TOTAL PARALELO</span>
+                                    <span id="read-pf">cos φ = 1.000</span>
+                                </div>
+                                <div class="flex justify-between"><span class="text-slate-400">Y_T:</span> <span id="read-YT" class="text-slate-100">0.137 ∠ 15.15° S (0.132 + j0.036 S)</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Z_eq:</span> <span id="read-ZT" class="text-slate-100">7.31 ∠ -15.15° Ω (7.06 - j1.91 Ω)</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">I_T:</span> <span id="read-IT" class="text-emerald-300 font-bold">13.68 ∠ 15.15° A (13.20 + j3.57 A)</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 2: EJERCICIOS RESUELTOS DE LA GUÍA Nº 5
+             ========================================== -->
+        <section id="tab-ejercicios" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <span class="text-xs font-mono uppercase text-sky-400">Práctica Oficial UNMDP • Electrotecnia A</span>
+                    <h2 class="text-xl font-bold text-white mt-0.5">Resolución Paso a Paso de la Guía de Trabajos Prácticos Nº 5</h2>
+                    <p class="text-sm text-slate-400 mt-1">
+                        Cada ejercicio incluye el planteo analítico directo, los resultados en formato polar y cartesiano entre paréntesis, y un botón para cargarlo en el laboratorio interactivo.
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="#ej-card-10" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-400 border border-slate-700">Ej. 10</a>
+                    <a href="#ej-card-11" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-400 border border-slate-700">Ej. 11</a>
+                    <a href="#ej-card-15" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-400 border border-slate-700">Ej. 15</a>
+                    <a href="#ej-card-16" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-400 border border-slate-700">Ej. 16</a>
+                    <a href="#ej-card-17" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-400 border border-slate-700">Ej. 17</a>
+                    <a href="#ej-card-18" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-400 border border-slate-700">Ej. 18</a>
+                    <a href="#ej-card-20" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-sky-400 border border-slate-700">Ej. 20</a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- EJERCICIO 10 -->
+                <div id="ej-card-10" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono text-xs font-bold">EJERCICIO 10 • CASO 3 (L Variable)</span>
+                            <span class="text-xs font-mono text-slate-400">Página 3 de la Guía</span>
+                        </div>
+                        <p class="text-sm text-slate-200 bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                            <strong>Enunciado:</strong> Hallar los valores de "L" para los que la pulsación de la frecuencia de resonancia del circuito de la figura (Rama 1: R₁ = 2 Ω, L variable // Rama 2: R₂ = 5 Ω, -jX_C = -j10 Ω) es ω = 5000 rad/seg. <br>
+                            <span class="text-emerald-400 font-mono text-xs">(Rta. Guía: L₁ = 2,43 mH ; L₂ = 0,066 mH)</span>
+                        </p>
+                        <div class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800/90 leading-relaxed">
+                            <div class="text-sky-400 font-bold mb-1">// 1. Admitancia de la rama fija RC (Z₂ = 5 - j10 Ω = 11.18 ∠ -63.43° Ω):</div>
+                            <div>Y₂ = 1 / (5 - j10) = (5 + j10) / (5² + 10²) = 0.0894 ∠ 63.43° S (0.040 + j0.080 S)</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 2. Condición de resonancia (Im[Y_T] = B_L + B_C = 0):</div>
+                            <div>B_L = X_L / (R₁² + X_L²) = B_C = 0.080 S</div>
+                            <div>0.080 · (2² + X_L²) = X_L  ⇒  0.08·X_L² - X_L + 0.32 = 0</div>
+                            <div>X_L² - 12.5·X_L + 4 = 0</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 3. Raíces de X_L y valores de inductancia L = X_L / ω:</div>
+                            <div>X_L1 = [12.5 + √(12.5² - 16)] / 2 = 12.171 Ω  ⇒ <strong class="text-emerald-400">L₁ = 12.171 / 5000 = 2.434 mH</strong></div>
+                            <div>X_L2 = [12.5 - √(12.5² - 16)] / 2 = 0.329 Ω   ⇒ <strong class="text-emerald-400">L₂ = 0.329 / 5000 = 0.066 mH</strong></div>
+                        </div>
+                    </div>
+                    <button onclick="loadPreset('ej10')" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs font-mono uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20">
+                        <i class="fa-solid fa-play"></i> Simular Ejercicio 10 en el Canvas (Ver los 2 Puntos de Resonancia)
+                    </button>
+                </div>
+
+                <!-- EJERCICIO 11 & 17 -->
+                <div id="ej-card-11" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono text-xs font-bold">EJERCICIOS 11 y 17 • CASO 4 (C Variable)</span>
+                            <span class="text-xs font-mono text-slate-400">Página 4 de la Guía</span>
+                        </div>
+                        <p class="text-sm text-slate-200 bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                            <strong>Enunciado (Ej. 17 / Ej. 11):</strong> La rama 1 tiene Z₁ = 8 + j6 Ω (en Ej. 11 figura 8 + j16 Ω) a ω = 5000 rad/seg. La rama 2 contiene R₂ = 8,34 Ω en serie con capacidad variable C. Encuentre C para resonancia y dibuje el lugar geométrico de Y.<br>
+                            <span class="text-emerald-400 font-mono text-xs">(Rta. Guía: C = 24 µF = 2,4×10⁻⁵ F)</span>
+                        </p>
+                        <div class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800/90 leading-relaxed">
+                            <div class="text-sky-400 font-bold mb-1">// 1. Admitancia de la Rama 1 (con Z₁ = 8 + j6 Ω = 10 ∠ 36.87° Ω):</div>
+                            <div>Y₁ = 1 / (8 + j6) = (8 - j6) / 100 = 0.10 ∠ -36.87° S (0.080 - j0.060 S)</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 2. Condición de resonancia (B_C = |B_L| = 0.060 S):</div>
+                            <div>X_C / (R₂² + X_C²) = 0.060  ⇒  X_C² - (1 / 0.060)·X_C + 8.34² = 0</div>
+                            <div>X_C² - 16.67·X_C + 69.55 = 0</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 3. Punto de tangencia (Radio del círculo de C = 1/(2·R₂) = 1/(2·8.34) = 0.060 S):</div>
+                            <div>X_C = 16.67 / 2 = 8.333 Ω (Raíz única doble / Semicírculo tangente al eje Real)</div>
+                            <div><strong class="text-emerald-400">C = 1 / (ω · X_C) = 1 / (5000 · 8.333) = 24.0 µF (2.4 × 10⁻⁵ F)</strong></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="loadPreset('ej17')" class="py-2.5 px-3 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs font-mono uppercase transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-play"></i> Simular Ej. 17 (Tangente C=24µF)
+                        </button>
+                        <button onclick="loadPreset('ej11')" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 font-medium text-xs font-mono uppercase transition flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-play"></i> Simular Ej. 11 (con j16Ω)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- EJERCICIO 15 -->
+                <div id="ej-card-15" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs font-bold">EJERCICIO 15 • CASO 1 (R₁ / R_L Variable)</span>
+                            <span class="text-xs font-mono text-slate-400">Página 4 de la Guía</span>
+                        </div>
+                        <p class="text-sm text-slate-200 bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                            <strong>Enunciado:</strong> Hallar el valor de R_L (R₁) para el que existe resonancia en el circuito de la figura (Rama 1: R_L variable en serie con j10 Ω // Rama 2: R₂ = 4 Ω en serie con -j5 Ω). Trazar el lugar geométrico de Y y explicar los resultados obtenidos.
+                        </p>
+                        <div class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800/90 leading-relaxed">
+                            <div class="text-sky-400 font-bold mb-1">// 1. Admitancia de la rama fija RC (Z₂ = 4 - j5 Ω = 6.403 ∠ -51.34° Ω):</div>
+                            <div>Y₂ = 1 / (4 - j5) = (4 + j5) / 41 = 0.1562 ∠ 51.34° S (0.0976 + j0.1220 S)</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 2. Susceptancia máxima alcanzable por la rama R_L + j10 Ω (cuando R_L = 0):</div>
+                            <div>|B_L(máx)| = 1 / X_L = 1 / 10 = 0.1000 S</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 3. Ecuación de resonancia B_L = B_C:</div>
+                            <div>10 / (R_L² + 10²) = 5 / 41 = 0.1220 S  ⇒  R_L² + 100 = 82  ⇒ <strong class="text-rose-400">R_L² = -18 (Sin solución real)</strong></div>
+                            <div class="text-amber-300 mt-1">
+                                <strong>Explicación física:</strong> Como la susceptancia capacitiva fija (B_C = 0.122 S) es mayor que el diámetro vertical del semicírculo inductivo (1/X_L = 0.10 S), aún cortocircuitando R_L = 0 Ω el circuito sigue teniendo corriente total capacitiva y el semicírculo de Y_T nunca corta al eje real.
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="loadPreset('ej15')" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs font-mono uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20">
+                        <i class="fa-solid fa-play"></i> Simular Ejercicio 15 en el Canvas (Ver por qué no corta el eje Real)
+                    </button>
+                </div>
+
+                <!-- EJERCICIO 16 -->
+                <div id="ej-card-16" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono text-xs font-bold">EJERCICIO 16 • CASO 2 (R_C Variable para φ = 45°)</span>
+                            <span class="text-xs font-mono text-slate-400">Página 4 de la Guía</span>
+                        </div>
+                        <p class="text-sm text-slate-200 bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                            <strong>Enunciado:</strong> Trazar el lugar geométrico de la intensidad de corriente que circula por el circuito (Rama 1: R₁ = 10 Ω pura // Rama 2: R_C variable en serie con -j4 Ω) y hallar el valor de R_C para el que la diferencia de fase entre V e I_T sea 45°.
+                        </p>
+                        <div class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800/90 leading-relaxed">
+                            <div class="text-sky-400 font-bold mb-1">// 1. Admitancia total del circuito paralelo:</div>
+                            <div>Y₁ = 1 / 10 = 0.10 ∠ 0° S (0.10 + j0.00 S)</div>
+                            <div>Y₂ = 1 / (R_C - j4) = R_C / (R_C² + 16) + j [4 / (R_C² + 16)]</div>
+                            <div>Y_T = [0.10 + R_C / (R_C² + 16)] + j [4 / (R_C² + 16)]</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 2. Condición de desfasaje φ = 45° (tan 45° = 1 ⇒ Re[Y_T] = Im[Y_T]):</div>
+                            <div>0.10 + R_C / (R_C² + 16) = 4 / (R_C² + 16)</div>
+                            <div>0.10·R_C² + R_C + 1.6 = 4  ⇒  0.10·R_C² + R_C - 2.4 = 0  ⇒  R_C² + 10·R_C - 24 = 0</div>
+                            <div><strong class="text-emerald-400">R_C = [-10 + √(100 + 96)] / 2 = (-10 + 14) / 2 = 2.00 Ω</strong></div>
+                        </div>
+                    </div>
+                    <button onclick="loadPreset('ej16')" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs font-mono uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20">
+                        <i class="fa-solid fa-play"></i> Simular Ejercicio 16 en el Canvas (R₂ = 2 Ω → φ = 45°)
+                    </button>
+                </div>
+
+                <!-- EJERCICIO 18 -->
+                <div id="ej-card-18" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono text-xs font-bold">EJERCICIO 18 • SÍNTESIS DEL LUGAR GEOMÉTRICO</span>
+                            <span class="text-xs font-mono text-slate-400">Página 5 de la Guía</span>
+                        </div>
+                        <p class="text-sm text-slate-200 bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                            <strong>Enunciado:</strong> Determinar el circuito correspondiente al lugar geométrico de intensidad de corriente representado en la figura sabiendo que ω = 2000 rad/seg, V = 250 ∠ 30° V, I₁ = 25 ∠ -15° A y el semicírculo de I_T es tangente al fasor V.<br>
+                            <span class="text-emerald-400 font-mono text-xs">(Rta. Guía: Rama 1: R₁ = 7,07 Ω, L = 3,54 mH ; Rama 2: R₂ = 7,07 Ω, C = Variable)</span>
+                        </p>
+                        <div class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800/90 leading-relaxed">
+                            <div class="text-sky-400 font-bold mb-1">// 1. Impedancia de la Rama 1 fija (desfasaje entre V e I₁ = 30° - (-15°) = 45° inductivo):</div>
+                            <div>Z₁ = |V| / |I₁| ∠ 45° = (250 / 25) ∠ 45° = 10 ∠ 45° Ω (7.071 + j7.071 Ω)</div>
+                            <div><strong class="text-emerald-400">R₁ = 7.07 Ω</strong>  ;  X_L = 7.071 Ω ⇒ <strong class="text-emerald-400">L = 7.071 / 2000 = 3.54 mH</strong></div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 2. Rama 2 variable (el semicírculo parte del extremo de I₁ y es tangente a V):</div>
+                            <div>Componente reactiva de I₁ perpendicular a V: |I_1y| = 25 · sen(45°) = 17.68 A</div>
+                            <div>Para que el semicírculo sea tangente al fasor V, su radio debe ser R_circ = |I_1y| = 17.68 A</div>
+                            <div>Diámetro del círculo de C variable: D_I = V / R₂ = 2 · R_circ = 35.355 A</div>
+                            <div><strong class="text-emerald-400">R₂ = 250 / 35.355 = 7.07 Ω en serie con C = Variable (Caso 4)</strong></div>
+                        </div>
+                    </div>
+                    <button onclick="loadPreset('ej18')" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs font-mono uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20">
+                        <i class="fa-solid fa-play"></i> Simular Ejercicio 18 en el Canvas (Ver Tangencia Exacta)
+                    </button>
+                </div>
+
+                <!-- EJERCICIO 20 -->
+                <div id="ej-card-20" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20 font-mono text-xs font-bold">EJERCICIO 20 • CORRECCIÓN DEL LUGAR GEOMÉTRICO</span>
+                            <span class="text-xs font-mono text-slate-400">Página 5 de la Guía</span>
+                        </div>
+                        <p class="text-sm text-slate-200 bg-slate-950/70 p-3.5 rounded-xl border border-slate-800">
+                            <strong>Enunciado:</strong> En la figura se encuentra el lugar geométrico de la corriente de un circuito paralelo de dos ramas con V = 100 ∠ 0° V e I_C = 20 ∠ 60° A. ¿Qué cambio en la rama RL (con R_L variable) hace que el extremo inferior A del semicírculo se encuentre exactamente sobre el fasor tensión?<br>
+                            <span class="text-emerald-400 font-mono text-xs">(Rta. Guía: X_L = 5,78 Ω)</span>
+                        </p>
+                        <div class="space-y-2 text-xs font-mono text-slate-300 bg-slate-950 p-4 rounded-xl border border-slate-800/90 leading-relaxed">
+                            <div class="text-sky-400 font-bold mb-1">// 1. Corriente de la rama capacitiva fija:</div>
+                            <div>I₂ = 20 ∠ 60° A (10.00 + j17.32 A)</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 2. El punto A corresponde al extremo del diámetro vertical de la rama R_L variable (cuando R_L = 0 Ω):</div>
+                            <div>En R_L = 0 Ω, la corriente por la rama inductiva es puramente imaginaria: I₁(A) = -j (V / X_L)</div>
+                            <div class="text-sky-400 font-bold mt-2 mb-1">// 3. Para que el punto A caiga sobre el fasor V (Im[I_T] = 0):</div>
+                            <div>Im[I₂] - V / X_L = 0  ⇒  17.32 - 100 / X_L = 0</div>
+                            <div><strong class="text-emerald-400">X_L = 100 / 17.3205 = 5.774 Ω ≈ 5.78 Ω</strong></div>
+                        </div>
+                    </div>
+                    <button onclick="loadPreset('ej20')" class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-medium text-xs font-mono uppercase tracking-wider transition flex items-center justify-center gap-2 shadow-lg shadow-sky-600/20">
+                        <i class="fa-solid fa-play"></i> Simular Ejercicio 20 en el Canvas (X_L = 5.78 Ω)
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ==========================================
+             TAB 3: RESUMEN TEÓRICO Y TABLA DE LOS 4 CASOS
+             ========================================== -->
+        <section id="tab-teoria" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-mono uppercase text-emerald-400">Formulario Técnico • Electrotecnia A</span>
+                        <h2 class="text-xl font-bold text-white mt-0.5">Síntesis Analítica y Geométrica de los 4 Casos Prácticos (R₁L // R₂C)</h2>
+                    </div>
+                    <button onclick="copyFormulasToClipboard()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-mono font-bold transition flex items-center gap-2 self-start">
+                        <i class="fa-regular fa-copy"></i> Copiar Fórmulas en Texto Plano (Para Word)
+                    </button>
+                </div>
+
+                <!-- Fundamental Condition -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs sm:text-sm space-y-2">
+                    <div class="text-sky-400 font-bold">CONDICIÓN GENERAL DE RESONANCIA EN PARALELO (Corriente Total I_T en fase con V):</div>
+                    <div class="text-slate-200">
+                        Y_T = Y₁ + Y₂ = [ R₁/(R₁² + X_L²) + R₂/(R₂² + X_C²) ] + j [ X_C/(R₂² + X_C²) - X_L/(R₁² + X_L²) ]
+                    </div>
+                    <div class="text-emerald-400 font-bold">
+                        Im(Y_T) = B_T = 0   ⇔   X_L / (R₁² + X_L²) = X_C / (R₂² + X_C²)
+                    </div>
+                </div>
+
+                <!-- 4 Cases Comparison Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse font-mono text-xs">
+                        <thead>
+                            <tr class="bg-slate-950 text-sky-400 border-b border-slate-800">
+                                <th class="p-3.5">Caso Práctico</th>
+                                <th class="p-3.5">Orientación y Diámetro del Semicírculo (Y)</th>
+                                <th class="p-3.5">Valor en el Punto de Resonancia (Im[Y_T] = 0)</th>
+                                <th class="p-3.5">Condición de Existencia de Resonancia</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-200">
+                            <tr class="hover:bg-slate-800/40">
+                                <td class="p-3.5 font-bold text-amber-400">
+                                    CASO 1:<br>R₁ Variable<br><span class="text-[11px] font-normal text-slate-400">(X_L, R₂, X_C fijos)</span>
+                                </td>
+                                <td class="p-3.5">
+                                    Diámetro sobre el <strong>Eje Imaginario (-jB)</strong><br>
+                                    Diámetro D_Y = 1 / X_L<br>
+                                    Radio R_Y = 1 / (2·X_L)
+                                </td>
+                                <td class="p-3.5 text-emerald-300">
+                                    R₁ = √[ X_L · (R₂² + X_C²) / X_C - X_L² ]<br>
+                                    <span class="text-slate-400">(A lo sumo 1 raíz positiva)</span>
+                                </td>
+                                <td class="p-3.5">
+                                    <strong>1 / X_L ≥ B_C</strong><br>
+                                    Es decir: X_L ≤ (R₂² + X_C²) / X_C.<br>
+                                    Si 1/X_L &lt; B_C no hay resonancia.
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40">
+                                <td class="p-3.5 font-bold text-cyan-400">
+                                    CASO 2:<br>R₂ Variable<br><span class="text-[11px] font-normal text-slate-400">(R₁, X_L, X_C fijos)</span>
+                                </td>
+                                <td class="p-3.5">
+                                    Diámetro sobre el <strong>Eje Imaginario (+jB)</strong><br>
+                                    Diámetro D_Y = 1 / X_C<br>
+                                    Radio R_Y = 1 / (2·X_C)
+                                </td>
+                                <td class="p-3.5 text-emerald-300">
+                                    R₂ = √[ X_C · (R₁² + X_L²) / X_L - X_C² ]<br>
+                                    <span class="text-slate-400">(A lo sumo 1 raíz positiva)</span>
+                                </td>
+                                <td class="p-3.5">
+                                    <strong>1 / X_C ≥ |B_L|</strong><br>
+                                    Es decir: X_C ≤ (R₁² + X_L²) / X_L.<br>
+                                    Si 1/X_C &lt; |B_L| no hay resonancia.
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40">
+                                <td class="p-3.5 font-bold text-emerald-400">
+                                    CASO 3:<br>L (X_L) Variable<br><span class="text-[11px] font-normal text-slate-400">(R₁, R₂, X_C fijos)</span>
+                                </td>
+                                <td class="p-3.5">
+                                    Diámetro sobre el <strong>Eje Real (+G)</strong><br>
+                                    Diámetro D_Y = 1 / R₁<br>
+                                    Radio R_Y = 1 / (2·R₁)
+                                </td>
+                                <td class="p-3.5 text-emerald-300">
+                                    X_L² - (1/B_C)·X_L + R₁² = 0<br>
+                                    X_L(1,2) = [1 ± √(1 - 4·R₁²·B_C²)] / (2·B_C)
+                                </td>
+                                <td class="p-3.5">
+                                    • <strong>1/(2·R₁) &gt; B_C:</strong> 2 Resonancias (X_L1, X_L2)<br>
+                                    • <strong>1/(2·R₁) = B_C:</strong> 1 Resonancia tangente<br>
+                                    • <strong>1/(2·R₁) &lt; B_C:</strong> 0 Resonancias
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/40">
+                                <td class="p-3.5 font-bold text-purple-400">
+                                    CASO 4:<br>C (X_C) Variable<br><span class="text-[11px] font-normal text-slate-400">(R₁, X_L, R₂ fijos)</span>
+                                </td>
+                                <td class="p-3.5">
+                                    Diámetro sobre el <strong>Eje Real (+G)</strong><br>
+                                    Diámetro D_Y = 1 / R₂<br>
+                                    Radio R_Y = 1 / (2·R₂)
+                                </td>
+                                <td class="p-3.5 text-emerald-300">
+                                    X_C² - (1/|B_L|)·X_C + R₂² = 0<br>
+                                    X_C(1,2) = [1 ± √(1 - 4·R₂²·B_L²)] / (2·|B_L|)
+                                </td>
+                                <td class="p-3.5">
+                                    • <strong>1/(2·R₂) &gt; |B_L|:</strong> 2 Resonancias (X_C1, X_C2)<br>
+                                    • <strong>1/(2·R₂) = |B_L|:</strong> 1 Resonancia tangente<br>
+                                    • <strong>1/(2·R₂) &lt; |B_L|:</strong> 0 Resonancias
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-4 px-6 text-center text-xs font-mono text-slate-500">
+        Universidad Nacional de Mar del Plata (UNMDP) • Facultad de Ingeniería • Departamento de Ingeniería Eléctrica y Electromecánica • Electrotecnia A
+    </footer>
+
+    <!-- ==========================================
+         JAVASCRIPT ENGINE: MATH, LOCUS & CANVAS
+         ========================================== -->
+    <script>
+        // Application State
+        const state = {
+            activeCase: 1, // 1: R1 var, 2: R2 var, 3: XL var, 4: XC var
+            locusMode: 'I', // 'I' (Current in Amps) or 'Y' (Admittance in Siemens)
+            V: 100,         // Source Voltage Magnitude [V] (Phase = 0°)
+            w: 5000,        // Angular frequency [rad/s]
+            R1: 4.0,        // Branch 1 Resistance [Ω]
+            XL: 10.0,       // Branch 1 Inductive Reactance [Ω]
+            R2: 4.0,        // Branch 2 Resistance [Ω]
+            XC: 5.0,        // Branch 2 Capacitive Reactance [Ω]
+            sliderMax: 40,
+            resonances: []  // Stores real positive resonance roots for active case
+        };
+
+        // Helper formatting functions
+        function fmt(val, dec = 2) {
+            return Number(val).toFixed(dec);
+        }
+
+        // Formats Complex in Polar (Cartesian) side-by-side as preferred
+        function fmtComplex(re, im, unit = '', dec = 2) {
+            const mag = Math.hypot(re, im);
+            const ang = Math.atan2(im, re) * (180 / Math.PI);
+            const sign = im >= 0 ? '+' : '-';
+            return `${fmt(mag, dec)} ∠ ${fmt(ang, 2)}° ${unit} (${fmt(re, dec)} ${sign} j${fmt(Math.abs(im), dec)} ${unit})`;
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 3200);
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            ['simulador', 'ejercicios', 'teoria'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                btn.className = "tab-btn flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/60";
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabName}`).className = "tab-btn flex-1 lg:flex-initial px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-2 bg-sky-600 text-white shadow-md shadow-sky-600/20";
+
+            if (tabName === 'simulador') {
+                setTimeout(() => {
+                    resizeCanvases();
+                    updateAll();
+                }, 50);
+            }
+        }
+
+        function setLocusMode(mode) {
+            state.locusMode = mode;
+            document.getElementById('mode-btn-I').className = mode === 'I'
+                ? 'px-2.5 py-1 rounded bg-sky-600 text-white font-semibold transition'
+                : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
+            document.getElementById('mode-btn-Y').className = mode === 'Y'
+                ? 'px-2.5 py-1 rounded bg-sky-600 text-white font-semibold transition'
+                : 'px-2.5 py-1 rounded text-slate-400 hover:text-white transition';
+            updateAll();
+        }
+
+        // Select one of the 4 Practical Cases
+        function setCase(caseNum) {
+            state.activeCase = caseNum;
+
+            // Update Case Selector UI buttons
+            for (let i = 1; i <= 4; i++) {
+                const btn = document.getElementById(`case-btn-${i}`);
+                const dot = btn.querySelector('.case-dot');
+                if (i === caseNum) {
+                    btn.className = "case-btn px-3.5 py-2.5 rounded-xl border text-left transition-all flex flex-col justify-between bg-sky-500/15 border-sky-400 shadow-lg shadow-sky-500/10";
+                    dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping case-dot";
+                } else {
+                    btn.className = "case-btn px-3.5 py-2.5 rounded-xl border text-left transition-all flex flex-col justify-between bg-slate-800/70 border-slate-700 hover:border-sky-500/50";
+                    dot.className = "w-2 h-2 rounded-full bg-slate-600 case-dot";
+                }
+            }
+
+            // Show/Hide fixed controls so the active variable is controlled via the primary green slider
+            const mapCtrl = { 1: 'ctrl-R1', 2: 'ctrl-R2', 3: 'ctrl-XL', 4: 'ctrl-XC' };
+            Object.entries(mapCtrl).forEach(([k, id]) => {
+                const el = document.getElementById(id);
+                if (Number(k) === caseNum) {
+                    el.classList.add('opacity-40', 'pointer-events-none', 'border-emerald-500/40');
+                } else {
+                    el.classList.remove('opacity-40', 'pointer-events-none', 'border-emerald-500/40');
+                }
+            });
+
+            // Update SVG variable arrows
+            for (let i = 1; i <= 4; i++) {
+                const arr = document.getElementById(`var-arrow-${i}`);
+                if (i === caseNum) arr.classList.remove('hidden');
+                else arr.classList.add('hidden');
+            }
+
+            // Configure main variable slider label & range
+            const titles = {
+                1: 'Resistencia R₁ Variable (Rama RL)',
+                2: 'Resistencia R₂ Variable (Rama RC)',
+                3: 'Reactancia X_L (Inductancia L) Variable',
+                4: 'Reactancia X_C (Capacidad C) Variable'
+            };
+            document.getElementById('var-label-title').textContent = titles[caseNum];
+
+            syncVariableSliderRange();
+            updateAll();
+        }
+
+        function getActiveVarValue() {
+            if (state.activeCase === 1) return state.R1;
+            if (state.activeCase === 2) return state.R2;
+            if (state.activeCase === 3) return state.XL;
+            return state.XC;
+        }
+
+        function setActiveVarValue(val) {
+            const v = Math.max(0.01, parseFloat(val) || 0.01);
+            if (state.activeCase === 1) state.R1 = v;
+            else if (state.activeCase === 2) state.R2 = v;
+            else if (state.activeCase === 3) state.XL = v;
+            else if (state.activeCase === 4) state.XC = v;
+        }
+
+        function syncVariableSliderRange() {
+            const resonances = computeResonances();
+            let maxVal = 30;
+            if (resonances.length > 0) {
+                const highestRes = Math.max(...resonances);
+                maxVal = Math.max(25, Math.ceil(highestRes * 1.6));
+            }
+            const curVal = getActiveVarValue();
+            if (curVal > maxVal) maxVal = Math.ceil(curVal * 1.25);
+
+            state.sliderMax = maxVal;
+            const slider = document.getElementById('var-slider');
+            slider.max = maxVal;
+            slider.value = curVal;
+            document.getElementById('var-num-input').value = fmt(curVal, 2);
+            document.getElementById('var-slider-mid').textContent = `${fmt(maxVal / 2, 0)} Ω`;
+            document.getElementById('var-slider-max').textContent = `${fmt(maxVal, 0)} Ω`;
+        }
+
+        function onVariableSlider(val) {
+            setActiveVarValue(val);
+            document.getElementById('var-num-input').value = fmt(val, 2);
+            syncFixedInputsFromState();
+            updateAll();
+        }
+
+        function onVariableInput(val) {
+            setActiveVarValue(val);
+            const num = getActiveVarValue();
+            if (num > state.sliderMax) {
+                state.sliderMax = Math.ceil(num * 1.3);
+                document.getElementById('var-slider').max = state.sliderMax;
+            }
+            document.getElementById('var-slider').value = num;
+            syncFixedInputsFromState();
+            updateAll();
+        }
+
+        function updateFixedParam(param, val) {
+            const v = Math.max(0.1, parseFloat(val) || 0.1);
+            state[param] = v;
+            syncFixedInputsFromState();
+            syncVariableSliderRange();
+            updateAll();
+        }
+
+        function syncFixedInputsFromState() {
+            document.getElementById('val-V').textContent = fmt(state.V, 0);
+            document.getElementById('param-V').value = state.V;
+            document.getElementById('val-w').textContent = fmt(state.w, 0);
+            document.getElementById('param-w').value = state.w;
+
+            ['R1', 'XL', 'R2', 'XC'].forEach(p => {
+                document.getElementById(`num-${p}`).value = fmt(state[p], 2);
+                document.getElementById(`param-${p}`).value = state[p];
+            });
+        }
+
+        // Compute exact analytical roots for Im(Y_T) = 0 for the active case
+        function computeResonances() {
+            const { R1, XL, R2, XC, activeCase } = state;
+            const roots = [];
+
+            if (activeCase === 1) {
+                // R1 variable: XL / (R1^2 + XL^2) = XC / (R2^2 + XC^2) = BC
+                const BC = XC / (R2 * R2 + XC * XC);
+                const rad = (XL / BC) - XL * XL;
+                if (rad >= -1e-7) {
+                    roots.push(Math.sqrt(Math.max(0, rad)));
+                }
+            } else if (activeCase === 2) {
+                // R2 variable: XC / (R2^2 + XC^2) = XL / (R1^2 + XL^2) = BL
+                const BL = XL / (R1 * R1 + XL * XL);
+                const rad = (XC / BL) - XC * XC;
+                if (rad >= -1e-7) {
+                    roots.push(Math.sqrt(Math.max(0, rad)));
+                }
+            } else if (activeCase === 3) {
+                // XL variable: XL^2 - (1/BC)*XL + R1^2 = 0
+                const BC = XC / (R2 * R2 + XC * XC);
+                const b = -1 / BC;
+                const c = R1 * R1;
+                const disc = b * b - 4 * c;
+                if (Math.abs(disc) < 1e-5) {
+                    roots.push(-b / 2);
+                } else if (disc > 0) {
+                    const r1 = (-b - Math.sqrt(disc)) / 2;
+                    const r2 = (-b + Math.sqrt(disc)) / 2;
+                    if (r1 > 0) roots.push(r1);
+                    if (r2 > 0) roots.push(r2);
+                }
+            } else if (activeCase === 4) {
+                // XC variable: XC^2 - (1/BL)*XC + R2^2 = 0
+                const BL = XL / (R1 * R1 + XL * XL);
+                const b = -1 / BL;
+                const c = R2 * R2;
+                const disc = b * b - 4 * c;
+                if (Math.abs(disc) < 1e-5) {
+                    roots.push(-b / 2);
+                } else if (disc > 0) {
+                    const r1 = (-b - Math.sqrt(disc)) / 2;
+                    const r2 = (-b + Math.sqrt(disc)) / 2;
+                    if (r1 > 0) roots.push(r1);
+                    if (r2 > 0) roots.push(r2);
+                }
+            }
+            state.resonances = roots;
+            return roots;
+        }
+
+        // Calculate Circuit Admittances and Currents for given parameters
+        function calcCircuit(R1, XL, R2, XC, V) {
+            const denom1 = R1 * R1 + XL * XL;
+            const G1 = R1 / denom1;
+            const B1 = -XL / denom1; // Inductive susceptance is negative
+
+            const denom2 = R2 * R2 + XC * XC;
+            const G2 = R2 / denom2;
+            const B2 = XC / denom2;  // Capacitive susceptance is positive
+
+            const GT = G1 + G2;
+            const BT = B1 + B2;
+
+            const I1_re = V * G1, I1_im = V * B1;
+            const I2_re = V * G2, I2_im = V * B2;
+            const IT_re = V * GT, IT_im = V * BT;
+
+            return {
+                G1, B1, G2, B2, GT, BT,
+                I1_re, I1_im, I2_re, I2_im, IT_re, IT_im
+            };
+        }
+
+        function jumpToResonance(val) {
+            setActiveVarValue(val);
+            document.getElementById('var-slider').value = val;
+            document.getElementById('var-num-input').value = fmt(val, 3);
+            syncFixedInputsFromState();
+            updateAll();
+        }
+
+        // Update UI Readouts, Explanations, SVG Schematic, and Canvases
+        function updateAll() {
+            const { R1, XL, R2, XC, V, w, activeCase } = state;
+            const c = calcCircuit(R1, XL, R2, XC, V);
+            const roots = computeResonances();
+
+            // L in mH and C in uF
+            const L_mH = (XL / w) * 1000;
+            const C_uF = (1 / (w * XC)) * 1e6;
+            document.getElementById('lbl-L-mH').textContent = `(L=${fmt(L_mH, 2)}mH)`;
+            document.getElementById('lbl-C-uF').textContent = `(C=${fmt(C_uF, 2)}µF)`;
+
+            // Top right badge on variable card
+            const varEquiv = document.getElementById('var-reactance-equiv');
+            if (activeCase === 1) varEquiv.textContent = `R₁ = ${fmt(R1, 2)} Ω`;
+            else if (activeCase === 2) varEquiv.textContent = `R₂ = ${fmt(R2, 2)} Ω`;
+            else if (activeCase === 3) varEquiv.textContent = `L = ${fmt(L_mH, 3)} mH (ω=${w} r/s)`;
+            else if (activeCase === 4) varEquiv.textContent = `C = ${fmt(C_uF, 2)} µF (ω=${w} r/s)`;
+
+            // Update SVG Schematic Texts
+            document.getElementById('svg-V').textContent = `${fmt(V, 0)}∠0°V`;
+            document.getElementById('svg-txt-R1').textContent = `R₁=${fmt(R1, 2)}Ω`;
+            document.getElementById('svg-txt-XL').textContent = `j${fmt(XL, 2)}Ω`;
+            document.getElementById('svg-txt-R2').textContent = `R₂=${fmt(R2, 2)}Ω`;
+            document.getElementById('svg-txt-XC').textContent = `-j${fmt(XC, 2)}Ω`;
+
+            document.getElementById('z1-summary').textContent = `Z₁ = ${fmt(R1, 1)} + j${fmt(XL, 1)} Ω`;
+            document.getElementById('z2-summary').textContent = `Z₂ = ${fmt(R2, 1)} - j${fmt(XC, 1)} Ω`;
+
+            // Update Resonance Jump Buttons
+            const btnContainer = document.getElementById('res-jump-buttons');
+            const badge = document.getElementById('res-status-badge');
+            const varSymbol = ['R₁', 'R₂', 'X_L', 'X_C'][activeCase - 1];
+
+            if (roots.length === 0) {
+                badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30";
+                badge.textContent = "Sin Resonancia Real";
+                btnContainer.innerHTML = `
+                    <div class="col-span-2 text-center py-1.5 px-2 rounded-lg bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs font-mono">
+                        El semicírculo no alcanza a cortar el eje Real (Im[I_T] ≠ 0)
+                    </div>`;
+            } else if (roots.length === 1) {
+                badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                badge.textContent = "1 Punto de Resonancia";
+                let extra = '';
+                if (activeCase === 3) extra = ` (L=${fmt((roots[0]/w)*1000, 2)}mH)`;
+                if (activeCase === 4) extra = ` (C=${fmt((1/(w*roots[0]))*1e6, 1)}µF)`;
+                btnContainer.innerHTML = `
+                    <button onclick="jumpToResonance(${roots[0]})" class="col-span-2 py-1.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-crosshairs"></i> Saltar a Resonancia: ${varSymbol} = ${fmt(roots[0], 2)} Ω${extra}
+                    </button>`;
+            } else {
+                badge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                badge.textContent = "2 Puntos de Resonancia";
+                const ext1 = activeCase === 3 ? `L₁=${fmt((roots[0]/w)*1000, 2)}mH` : `C₁=${fmt((1/(w*roots[0]))*1e6, 1)}µF`;
+                const ext2 = activeCase === 3 ? `L₂=${fmt((roots[1]/w)*1000, 2)}mH` : `C₂=${fmt((1/(w*roots[1]))*1e6, 1)}µF`;
+                btnContainer.innerHTML = `
+                    <button onclick="jumpToResonance(${roots[0]})" class="py-1.5 px-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[11px] font-bold transition shadow flex flex-col items-center">
+                        <span><i class="fa-solid fa-crosshairs"></i> Res. 1: ${varSymbol}=${fmt(roots[0], 2)}Ω</span>
+                        <span class="text-[10px] text-emerald-100">${ext1}</span>
+                    </button>
+                    <button onclick="jumpToResonance(${roots[1]})" class="py-1.5 px-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-mono text-[11px] font-bold transition shadow flex flex-col items-center">
+                        <span><i class="fa-solid fa-crosshairs"></i> Res. 2: ${varSymbol}=${fmt(roots[1], 2)}Ω</span>
+                        <span class="text-[10px] text-teal-100">${ext2}</span>
+                    </button>`;
+            }
+
+            // Update Polar (Cartesian) Readout Table
+            document.getElementById('read-Z1').textContent = fmtComplex(R1, XL, 'Ω', 2);
+            document.getElementById('read-Y1').textContent = fmtComplex(c.G1, c.B1, 'S', 3);
+            document.getElementById('read-I1').textContent = fmtComplex(c.I1_re, c.I1_im, 'A', 2);
+
+            document.getElementById('read-Z2').textContent = fmtComplex(R2, -XC, 'Ω', 2);
+            document.getElementById('read-Y2').textContent = fmtComplex(c.G2, c.B2, 'S', 3);
+            document.getElementById('read-I2').textContent = fmtComplex(c.I2_re, c.I2_im, 'A', 2);
+
+            document.getElementById('read-YT').textContent = fmtComplex(c.GT, c.BT, 'S', 3);
+            const denomY = c.GT * c.GT + c.BT * c.BT;
+            const Zeq_re = denomY > 0 ? c.GT / denomY : 0;
+            const Zeq_im = denomY > 0 ? -c.BT / denomY : 0;
+            document.getElementById('read-ZT').textContent = fmtComplex(Zeq_re, Zeq_im, 'Ω', 2);
+            document.getElementById('read-IT').textContent = fmtComplex(c.IT_re, c.IT_im, 'A', 2);
+
+            const phaseDeg = Math.atan2(c.IT_im, c.IT_re) * (180 / Math.PI);
+            const pf = Math.cos(phaseDeg * Math.PI / 180);
+            document.getElementById('read-pf').textContent = `cos φ = ${fmt(pf, 3)} (${Math.abs(phaseDeg) < 0.3 ? 'EN RESONANCIA' : (phaseDeg > 0 ? 'Capacitivo' : 'Inductivo')})`;
+            document.getElementById('current-op-badge').textContent = `|I_T| = ${fmt(Math.hypot(c.IT_re, c.IT_im), 2)} A  •  φ = ${fmt(phaseDeg, 2)}°`;
+
+            // Update Analytical & Geometric Explanation Box
+            updateAnalyticalExplanation(c, roots);
+
+            // Redraw Both Canvases
+            drawLocusCanvas(c, roots);
+            drawCurvesCanvas(c, roots);
+        }
+
+        function updateAnalyticalExplanation(c, roots) {
+            const { R1, XL, R2, XC, V, w, activeCase } = state;
+            const expBox = document.getElementById('resonance-explanation-box');
+            const mathBox = document.getElementById('resonance-math-box');
+            const geoBadge = document.getElementById('geometric-radius-info');
+
+            if (activeCase === 1) {
+                const D_I = V / XL;
+                const I2_im = c.I2_im;
+                geoBadge.textContent = `Diámetro Vertical D_I = V / X_L = ${fmt(D_I, 2)} A`;
+                expBox.innerHTML = `
+                    <p><strong>Caso 1 (R₁ Variable, resto fijo):</strong> El extremo del fasor <strong>I₁</strong> describe un semicírculo con diámetro vertical de módulo <strong>D_I = V / X_L = ${fmt(D_I, 2)} A</strong> (${fmt(1/XL, 3)} S), sumado al vector fijo <strong>I₂</strong>.</p>
+                    <p>${roots.length === 1
+                        ? `<span class="text-emerald-400 font-semibold">✔ Existe 1 punto de resonancia</span> en <strong>R₁ = ${fmt(roots[0], 2)} Ω</strong> porque la corriente reactiva capacitiva fija Im(I₂) = ${fmt(I2_im, 2)} A es menor o igual que la máxima corriente inductiva V/X_L = ${fmt(D_I, 2)} A.`
+                        : `<span class="text-rose-400 font-semibold">✖ No existe resonancia real</span> porque la componente reactiva capacitiva Im(I₂) = ${fmt(I2_im, 2)} A supera el diámetro máximo del semicírculo inductivo V/X_L = ${fmt(D_I, 2)} A.`}</p>
+                `;
+                mathBox.innerHTML = `
+                    <div class="text-sky-400 font-bold">// Ecuación de Resonancia (R₁ Variable):</div>
+                    <div>B_L = X_L / (R₁² + X_L²) = B_C = ${fmt(c.B2, 4)} S</div>
+                    <div>R₁ = √[ (${fmt(XL,1)} / ${fmt(c.B2,4)}) - ${fmt(XL,1)}² ]</div>
+                    <div class="text-emerald-400 font-bold">${roots.length ? `R₁(res) = ${fmt(roots[0], 3)} Ω` : 'Raíz Imaginaria (R₁² < 0)'}</div>
+                `;
+            } else if (activeCase === 2) {
+                const D_I = V / XC;
+                const I1_im = Math.abs(c.I1_im);
+                geoBadge.textContent = `Diámetro Vertical D_I = V / X_C = ${fmt(D_I, 2)} A`;
+                expBox.innerHTML = `
+                    <p><strong>Caso 2 (R₂ Variable, resto fijo):</strong> El fasor <strong>I₂</strong> describe un semicírculo superior con diámetro vertical <strong>D_I = V / X_C = ${fmt(D_I, 2)} A</strong> (${fmt(1/XC, 3)} S), desplazado desde el extremo del fasor fijo <strong>I₁</strong>.</p>
+                    <p>${roots.length === 1
+                        ? `<span class="text-emerald-400 font-semibold">✔ Existe 1 punto de resonancia</span> en <strong>R₂ = ${fmt(roots[0], 2)} Ω</strong> porque la máxima corriente capacitiva V/X_C = ${fmt(D_I, 2)} A alcanza para compensar |Im(I₁)| = ${fmt(I1_im, 2)} A.`
+                        : `<span class="text-rose-400 font-semibold">✖ No existe resonancia real</span> porque el diámetro vertical V/X_C = ${fmt(D_I, 2)} A es menor que |Im(I₁)| = ${fmt(I1_im, 2)} A.`}</p>
+                `;
+                mathBox.innerHTML = `
+                    <div class="text-sky-400 font-bold">// Ecuación de Resonancia (R₂ Variable):</div>
+                    <div>B_C = X_C / (R₂² + X_C²) = |B_L| = ${fmt(Math.abs(c.B1), 4)} S</div>
+                    <div>R₂ = √[ (${fmt(XC,1)} / ${fmt(Math.abs(c.B1),4)}) - ${fmt(XC,1)}² ]</div>
+                    <div class="text-emerald-400 font-bold">${roots.length ? `R₂(res) = ${fmt(roots[0], 3)} Ω` : 'Raíz Imaginaria (R₂² < 0)'}</div>
+                `;
+            } else if (activeCase === 3) {
+                const R_I = V / (2 * R1);
+                const I2_im = c.I2_im;
+                geoBadge.textContent = `Radio del Semicírculo R_I = V / (2·R₁) = ${fmt(R_I, 2)} A`;
+                expBox.innerHTML = `
+                    <p><strong>Caso 3 (L / X_L Variable, resto fijo):</strong> Como R₁ es constante, el lugar geométrico tiene su <strong>diámetro horizontal paralelo a V</strong> de valor D_I = V/R₁ = ${fmt(2*R_I, 2)} A y <strong>radio R_I = V/(2·R₁) = ${fmt(R_I, 2)} A</strong> hacia abajo.</p>
+                    <p>${roots.length === 2
+                        ? `<span class="text-emerald-400 font-semibold">✔ Existen 2 resonancias</span> (X_L1 = ${fmt(roots[0],2)} Ω y X_L2 = ${fmt(roots[1],2)} Ω) porque el radio del semicírculo (${fmt(R_I,2)} A) es mayor que Im(I₂) = ${fmt(I2_im,2)} A, cortando dos veces al eje Real.`
+                        : (roots.length === 1
+                            ? `<span class="text-amber-400 font-semibold">✔ Resonancia única tangente</span> en X_L = ${fmt(roots[0],2)} Ω (Radio = Im(I₂) = ${fmt(R_I,2)} A).`
+                            : `<span class="text-rose-400 font-semibold">✖ Sin resonancia:</span> El radio del semicírculo V/(2·R₁) = ${fmt(R_I,2)} A es menor que Im(I₂) = ${fmt(I2_im,2)} A.`)}</p>
+                `;
+                mathBox.innerHTML = `
+                    <div class="text-sky-400 font-bold">// Cuadrática de Resonancia (X_L Variable):</div>
+                    <div>X_L² - ${fmt(1/c.B2, 2)}·X_L + ${fmt(R1*R1, 2)} = 0</div>
+                    <div class="text-emerald-400 font-bold">${
+                        roots.length === 2
+                        ? `X_L1 = ${fmt(roots[0],2)} Ω (L₁=${fmt((roots[0]/w)*1000,2)}mH)<br>X_L2 = ${fmt(roots[1],2)} Ω (L₂=${fmt((roots[1]/w)*1000,2)}mH)`
+                        : (roots.length === 1 ? `X_L(tangente) = ${fmt(roots[0],2)} Ω` : 'Discriminante Δ < 0 (No corta al eje Real)')
+                    }</div>
+                `;
+            } else if (activeCase === 4) {
+                const R_I = V / (2 * R2);
+                const I1_im = Math.abs(c.I1_im);
+                geoBadge.textContent = `Radio del Semicírculo R_I = V / (2·R₂) = ${fmt(R_I, 2)} A`;
+                expBox.innerHTML = `
+                    <p><strong>Caso 4 (C / X_C Variable, resto fijo):</strong> Como R₂ es constante, el semicírculo capacitivo tiene su <strong>diámetro horizontal paralelo a V</strong> de valor D_I = V/R₂ = ${fmt(2*R_I, 2)} A y <strong>radio R_I = V/(2·R₂) = ${fmt(R_I, 2)} A</strong> hacia arriba.</p>
+                    <p>${roots.length === 2
+                        ? `<span class="text-emerald-400 font-semibold">✔ Existen 2 resonancias</span> (X_C1 = ${fmt(roots[0],2)} Ω y X_C2 = ${fmt(roots[1],2)} Ω) porque el radio del semicírculo (${fmt(R_I,2)} A) supera |Im(I₁)| = ${fmt(I1_im,2)} A.`
+                        : (roots.length === 1
+                            ? `<span class="text-amber-400 font-semibold">✔ Resonancia única tangente</span> en X_C = ${fmt(roots[0],2)} Ω (Radio R_I = |Im(I₁)| = ${fmt(R_I,2)} A).`
+                            : `<span class="text-rose-400 font-semibold">✖ Sin resonancia:</span> El radio del semicírculo V/(2·R₂) = ${fmt(R_I,2)} A no alcanza a cubrir |Im(I₁)| = ${fmt(I1_im,2)} A.`)}</p>
+                `;
+                mathBox.innerHTML = `
+                    <div class="text-sky-400 font-bold">// Cuadrática de Resonancia (X_C Variable):</div>
+                    <div>X_C² - ${fmt(1/Math.abs(c.B1), 2)}·X_C + ${fmt(R2*R2, 2)} = 0</div>
+                    <div class="text-emerald-400 font-bold">${
+                        roots.length === 2
+                        ? `X_C1 = ${fmt(roots[0],2)} Ω (C₁=${fmt((1/(w*roots[0]))*1e6,1)}µF)<br>X_C2 = ${fmt(roots[1],2)} Ω (C₂=${fmt((1/(w*roots[1]))*1e6,1)}µF)`
+                        : (roots.length === 1 ? `X_C(tangente) = ${fmt(roots[0],2)} Ω (C=${fmt((1/(w*roots[0]))*1e6,1)}µF)` : 'Discriminante Δ < 0 (No corta al eje Real)')
+                    }</div>
+                `;
+            }
+        }
+
+        // =========================================================================
+        // CANVAS 1: LOCUS DIAGRAM (PLANO COMPLEJO DE CORRIENTE I_T / ADMITANCIA Y_T)
+        // =========================================================================
+        function drawLocusCanvas(c, roots) {
+            const canvas = document.getElementById('canvas-locus');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width;
+            const H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const { R1, XL, R2, XC, V, activeCase, locusMode } = state;
+            const mult = locusMode === 'I' ? V : 1;
+            const unit = locusMode === 'I' ? 'A' : 'S';
+
+            // Sample locus points to determine bounding box for auto-scale
+            const pts = [{ x: 0, y: 0 }];
+            pts.push({ x: c.G1 * mult, y: c.B1 * mult });
+            pts.push({ x: c.G2 * mult, y: c.B2 * mult });
+            pts.push({ x: c.GT * mult, y: c.BT * mult });
+
+            const locusPts = [];
+            const steps = 180;
+            for (let i = 0; i <= steps; i++) {
+                // Parameter t from 0 to infinity mapped non-linearly
+                const t = i === steps ? 1e6 : Math.tan((i / steps) * (Math.PI / 2 - 0.001)) * 12;
+                let r1 = R1, xl = XL, r2 = R2, xc = XC;
+                if (activeCase === 1) r1 = t;
+                else if (activeCase === 2) r2 = t;
+                else if (activeCase === 3) xl = t;
+                else if (activeCase === 4) xc = t;
+
+                const sim = calcCircuit(r1, xl, r2, xc, V);
+                const p = { x: sim.GT * mult, y: sim.BT * mult, param: t };
+                locusPts.push(p);
+                pts.push(p);
+            }
+
+            // Compute bounds
+            let minX = 0, maxX = 0, minY = 0, maxY = 0;
+            pts.forEach(p => {
+                if (p.x < minX) minX = p.x;
+                if (p.x > maxX) maxX = p.x;
+                if (p.y < minY) minY = p.y;
+                if (p.y > maxY) maxY = p.y;
+            });
+
+            const spanX = Math.max(maxX - minX, 1e-3);
+            const spanY = Math.max(maxY - minY, 1e-3);
+            const pad = 52;
+            const scale = Math.min((W - pad * 2) / (spanX * 1.25), (H - pad * 2) / (spanY * 1.25));
+
+            const cx = W / 2 - ((minX + maxX) / 2) * scale;
+            const cy = H / 2 + ((minY + maxY) / 2) * scale;
+
+            const toX = x => cx + x * scale;
+            const toY = y => cy - y * scale;
+
+            // Draw subtle grid
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            const rawStep = Math.max(spanX, spanY) / 5;
+            const magPow = Math.pow(10, Math.floor(Math.log10(rawStep)));
+            const gridStep = Math.ceil(rawStep / magPow) * magPow || 1;
+
+            for (let gx = Math.floor((minX - spanX) / gridStep) * gridStep; gx <= maxX + spanX; gx += gridStep) {
+                const px = toX(gx);
+                if (px >= 0 && px <= W) {
+                    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+                }
+            }
+            for (let gy = Math.floor((minY - spanY) / gridStep) * gridStep; gy <= maxY + spanY; gy += gridStep) {
+                const py = toY(gy);
+                if (py >= 0 && py <= H) {
+                    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+                }
+            }
+
+            // Draw Real & Imaginary Axes
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(0, cy); ctx.lineTo(W, cy);
+            ctx.moveTo(cx, 0); ctx.lineTo(cx, H);
+            ctx.stroke();
+
+            // Reference Voltage Vector V along positive Real Axis
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 4]);
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(W - 20, cy);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 11px JetBrains Mono';
+            ctx.fillText(`Eje Real (Fasor V = ${V}∠0° V)`, W - 195, cy - 8);
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillText(`+j Im (${unit})`, cx + 8, 18);
+            ctx.fillText(`-j Im (${unit})`, cx + 8, H - 10);
+
+            // Fixed Branch Vector (Origin of the shifted semicircle)
+            const isBranch1Fixed = (activeCase === 2 || activeCase === 4);
+            const fixX = (isBranch1Fixed ? c.G1 : c.G2) * mult;
+            const fixY = (isBranch1Fixed ? c.B1 : c.B2) * mult;
+            const fixColor = isBranch1Fixed ? '#f59e0b' : '#06b6d4';
+            const fixLabel = isBranch1Fixed ? (locusMode === 'I' ? 'I₁ (Fija)' : 'Y₁ (Fija)') : (locusMode === 'I' ? 'I₂ (Fija)' : 'Y₂ (Fija)');
+
+            drawArrow(ctx, cx, cy, toX(fixX), toY(fixY), fixColor, 2.2);
+            ctx.fillStyle = fixColor;
+            ctx.font = 'bold 11px JetBrains Mono';
+            ctx.fillText(fixLabel, toX(fixX * 0.55) + 6, toY(fixY * 0.55) - 6);
+
+            // Draw Semicircular Locus of Total Current / Admittance
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            locusPts.forEach((p, idx) => {
+                const px = toX(p.x), py = toY(p.y);
+                if (idx === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // Draw Diameter dashed line of the semicircle
+            const pStart = locusPts[0];
+            const pEnd = locusPts[locusPts.length - 1];
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(toX(pStart.x), toY(pStart.y));
+            ctx.lineTo(toX(pEnd.x), toY(pEnd.y));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Label endpoints (Parámetro = 0 and Parámetro -> ∞)
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '10px JetBrains Mono';
+            const varName = ['R₁', 'R₂', 'X_L', 'X_C'][activeCase - 1];
+            ctx.fillText(`${varName}=0`, toX(pStart.x) + 6, toY(pStart.y) + 4);
+            ctx.fillText(`${varName}→∞`, toX(pEnd.x) + 6, toY(pEnd.y) - 6);
+
+            // Draw Current Variable Branch Phasor from the tip of Fixed Branch to Total Tip
+            const totX = c.GT * mult;
+            const totY = c.BT * mult;
+            const varColor = isBranch1Fixed ? '#06b6d4' : '#f59e0b';
+            const varLabel = isBranch1Fixed ? (locusMode === 'I' ? 'I₂ (Var)' : 'Y₂ (Var)') : (locusMode === 'I' ? 'I₁ (Var)' : 'Y₁ (Var)');
+            drawArrow(ctx, toX(fixX), toY(fixY), toX(totX), toY(totY), varColor, 2.2);
+            ctx.fillStyle = varColor;
+            ctx.font = 'bold 11px JetBrains Mono';
+            ctx.fillText(varLabel, (toX(fixX) + toX(totX)) / 2 + 6, (toY(fixY) + toY(totY)) / 2);
+
+            // Draw Total Resultant Vector (IT or YT) from Origin
+            drawArrow(ctx, cx, cy, toX(totX), toY(totY), '#10b981', 3);
+
+            // Highlight Resonance Points on the Real Axis
+            roots.forEach((rVal, idx) => {
+                let r1 = R1, xl = XL, r2 = R2, xc = XC;
+                if (activeCase === 1) r1 = rVal;
+                else if (activeCase === 2) r2 = rVal;
+                else if (activeCase === 3) xl = rVal;
+                else if (activeCase === 4) xc = rVal;
+
+                const resSim = calcCircuit(r1, xl, r2, xc, V);
+                const rx = toX(resSim.GT * mult);
+                const ry = toY(0);
+
+                // Outer glow ring
+                ctx.beginPath();
+                ctx.arc(rx, ry, 9, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(244, 63, 94, 0.28)';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(rx, ry, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#f43f5e';
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#fda4af';
+                ctx.font = 'bold 11px JetBrains Mono';
+                const offsetY = idx === 0 ? -14 : 20;
+                ctx.fillText(`Res.${roots.length > 1 ? idx + 1 : ''}: ${varName}=${fmt(rVal, 2)}Ω`, rx - 35, ry + offsetY);
+            });
+
+            // Draw Active Operating Point Marker
+            const curPx = toX(totX);
+            const curPy = toY(totY);
+            ctx.beginPath();
+            ctx.arc(curPx, curPy, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#10b981';
+            ctx.strokeStyle = '#052e16';
+            ctx.lineWidth = 2;
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 11px JetBrains Mono';
+            ctx.fillText(`${locusMode}_T = ${fmt(Math.hypot(totX, totY), 2)}∠${fmt(Math.atan2(totY, totX)*180/Math.PI, 1)}° ${unit}`, curPx + 10, curPy - 8);
+        }
+
+        function drawArrow(ctx, x1, y1, x2, y2, color, width = 2) {
+            const headlen = 9;
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const angle = Math.atan2(dy, dx);
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // =========================================================================
+        // CANVAS 2: PARAMETRIC CURVES VS ACTIVE VARIABLE ELEMENT
+        // =========================================================================
+        function drawCurvesCanvas(c, roots) {
+            const canvas = document.getElementById('canvas-curves');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width;
+            const H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+
+            const { R1, XL, R2, XC, V, activeCase, sliderMax } = state;
+            const padL = 48, padR = 25, padT = 25, padB = 36;
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+
+            // Sample curves from 0.05 to sliderMax
+            const N = 160;
+            const samples = [];
+            let maxCurr = 1;
+
+            for (let i = 0; i <= N; i++) {
+                const xVal = 0.05 + (i / N) * (sliderMax - 0.05);
+                let r1 = R1, xl = XL, r2 = R2, xc = XC;
+                if (activeCase === 1) r1 = xVal;
+                else if (activeCase === 2) r2 = xVal;
+                else if (activeCase === 3) xl = xVal;
+                else if (activeCase === 4) xc = xVal;
+
+                const s = calcCircuit(r1, xl, r2, xc, V);
+                const magI = Math.hypot(s.IT_re, s.IT_im);
+                const imI = s.IT_im;
+                const phase = Math.atan2(s.IT_im, s.IT_re) * (180 / Math.PI);
+                if (magI > maxCurr) maxCurr = magI;
+                if (Math.abs(imI) > maxCurr) maxCurr = Math.abs(imI);
+                samples.push({ xVal, magI, imI, phase });
+            }
+
+            const yMax = maxCurr * 1.15;
+            const zeroY = padT + plotH / 2;
+            const toX = x => padL + (x / sliderMax) * plotW;
+            const toY = y => zeroY - (y / yMax) * (plotH / 2);
+
+            // Grid lines
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const gy = padT + (i / 4) * plotH;
+                ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke();
+            }
+            for (let i = 0; i <= 5; i++) {
+                const gx = padL + (i / 5) * plotW;
+                ctx.beginPath(); ctx.moveTo(gx, padT); ctx.lineTo(gx, H - padB); ctx.stroke();
+                ctx.fillStyle = '#64748b';
+                ctx.font = '10px JetBrains Mono';
+                ctx.fillText(`${fmt((i / 5) * sliderMax, 0)}Ω`, gx - 10, H - 12);
+            }
+
+            // Zero Axis Line (Im(I_T) = 0 -> Resonance line)
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(padL, zeroY);
+            ctx.lineTo(W - padR, zeroY);
+            ctx.stroke();
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px JetBrains Mono';
+            ctx.fillText(`+${fmt(yMax, 1)}A`, 4, padT + 8);
+            ctx.fillText(`0 A`, 18, zeroY + 4);
+            ctx.fillText(`-${fmt(yMax, 1)}A`, 4, H - padB);
+
+            // Plot Phase Angle Curve (scaled to plotH/2 = 90 deg)
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.8;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            samples.forEach((s, i) => {
+                const px = toX(s.xVal);
+                const py = zeroY - (s.phase / 90) * (plotH / 2);
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Plot Imaginary Current Im(I_T)
+            ctx.strokeStyle = '#e879f9';
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            samples.forEach((s, i) => {
+                const px = toX(s.xVal);
+                const py = toY(s.imI);
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // Plot Total Current Magnitude |I_T|
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            samples.forEach((s, i) => {
+                const px = toX(s.xVal);
+                const py = toY(s.magI);
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // Draw Resonance Vertical Lines & Zero-Crossing Markers
+            const varName = ['R₁', 'R₂', 'X_L', 'X_C'][activeCase - 1];
+            roots.forEach((rVal, idx) => {
+                if (rVal <= sliderMax) {
+                    const rx = toX(rVal);
+                    ctx.strokeStyle = 'rgba(244, 63, 94, 0.7)';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 3]);
+                    ctx.beginPath();
+                    ctx.moveTo(rx, padT);
+                    ctx.lineTo(rx, H - padB);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    ctx.beginPath();
+                    ctx.arc(rx, zeroY, 5.5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#f43f5e';
+                    ctx.fill();
+
+                    ctx.fillStyle = '#fda4af';
+                    ctx.font = 'bold 10px JetBrains Mono';
+                    ctx.fillText(`Res: ${fmt(rVal, 2)}Ω`, rx + 5, padT + 14 + idx * 14);
+                }
+            });
+
+            // Draw Active Parameter Cursor Line
+            const curVal = getActiveVarValue();
+            const curX = toX(Math.min(curVal, sliderMax));
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(curX, padT);
+            ctx.lineTo(curX, H - padB);
+            ctx.stroke();
+
+            // Dots on curves at current value
+            const curMagY = toY(Math.hypot(c.IT_re, c.IT_im));
+            const curImY = toY(c.IT_im);
+
+            ctx.beginPath(); ctx.arc(curX, curMagY, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#10b981'; ctx.fill();
+
+            ctx.beginPath(); ctx.arc(curX, curImY, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#e879f9'; ctx.fill();
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = 'bold 11px JetBrains Mono';
+            ctx.fillText(`Parámetro ${varName} [Ω]`, W / 2 - 45, H - 2);
+        }
+
+        // Allow clicking/dragging on Canvas 2 to change the variable parameter directly
+        function initCanvasInteractivity() {
+            const c2 = document.getElementById('canvas-curves');
+            let dragging = false;
+
+            const updateFromMouse = (e) => {
+                const rect = c2.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const padL = 48, padR = 25;
+                const plotW = c2.width - padL - padR;
+                const ratio = Math.max(0.005, Math.min(1, (x - padL) / plotW));
+                const newVal = ratio * state.sliderMax;
+                onVariableSlider(newVal);
+            };
+
+            c2.addEventListener('mousedown', (e) => { dragging = true; updateFromMouse(e); });
+            window.addEventListener('mousemove', (e) => { if (dragging) updateFromMouse(e); });
+            window.addEventListener('mouseup', () => { dragging = false; });
+        }
+
+        // Load Presets from Guía TP 5
+        function loadPreset(presetId) {
+            switchTab('simulador');
+            if (presetId === 'ej10') {
+                // Ej 10: R1=2, L var, R2=5, XC=10, w=5000
+                state.V = 100; state.w = 5000;
+                state.R1 = 2.0; state.XL = 12.17;
+                state.R2 = 5.0; state.XC = 10.0;
+                setCase(3);
+                showToast('Cargado Ejercicio 10 (L Variable: 2 puntos de resonancia L₁=2.43mH y L₂=0.066mH)');
+            } else if (presetId === 'ej11') {
+                // Ej 11: R1=8, XL=16, R2=8.34, C var, w=5000
+                state.V = 100; state.w = 5000;
+                state.R1 = 8.0; state.XL = 16.0;
+                state.R2 = 8.34; state.XC = 8.33;
+                setCase(4);
+                showToast('Cargado Ejercicio 11 (R₁=8Ω, X_L=16Ω, R₂=8.34Ω, C Variable)');
+            } else if (presetId === 'ej15') {
+                // Ej 15: R1 var, XL=10, R2=4, XC=5
+                state.V = 100; state.w = 5000;
+                state.R1 = 2.0; state.XL = 10.0;
+                state.R2 = 4.0; state.XC = 5.0;
+                setCase(1);
+                showToast('Cargado Ejercicio 15 (R₁ Variable: verifique por qué B_C > 1/X_L impide la resonancia)');
+            } else if (presetId === 'ej16') {
+                // Ej 16: R1=10, XL=0.05 (R pura), R2 var=2, XC=4
+                state.V = 100; state.w = 5000;
+                state.R1 = 10.0; state.XL = 0.05;
+                state.R2 = 2.0; state.XC = 4.0;
+                setCase(2);
+                showToast('Cargado Ejercicio 16 (R_C = 2.0 Ω para desfasaje φ = 45°)');
+            } else if (presetId === 'ej17') {
+                // Ej 17: Z1 = 8 + j6, R2 = 8.34, C var, w = 5000 -> C = 24uF (XC = 8.333)
+                state.V = 100; state.w = 5000;
+                state.R1 = 8.0; state.XL = 6.0;
+                state.R2 = 8.34; state.XC = 8.333;
+                setCase(4);
+                showToast('Cargado Ejercicio 17 (C = 24 µF, Semicírculo tangente al eje Real)');
+            } else if (presetId === 'ej18') {
+                // Ej 18: V=250, w=2000, R1=7.07, XL=7.07, R2=7.07, C var
+                state.V = 250; state.w = 2000;
+                state.R1 = 7.071; state.XL = 7.071;
+                state.R2 = 7.071; state.XC = 7.071;
+                setCase(4);
+                showToast('Cargado Ejercicio 18 (R₁=7.07Ω, L=3.54mH, R₂=7.07Ω, C Variable Tangente)');
+            } else if (presetId === 'ej20') {
+                // Ej 20: V=100, I2=20<60 (R2=2.5, XC=4.33), R1 var=0.05, XL=5.774
+                state.V = 100; state.w = 5000;
+                state.R1 = 0.05; state.XL = 5.774;
+                state.R2 = 2.50; state.XC = 4.33;
+                setCase(1);
+                showToast('Cargado Ejercicio 20 (X_L = 5.78 Ω ubica el extremo A sobre el fasor V)');
+            } else if (presetId === 'caso2_2res') {
+                // Caso 2 con resonancia clara: R1=6, XL=8, XC=5, R2 var -> R2=5
+                state.V = 100; state.w = 5000;
+                state.R1 = 6.0; state.XL = 8.0;
+                state.R2 = 5.0; state.XC = 5.0;
+                setCase(2);
+                showToast('Cargado Caso 2 (R₂ Variable con Resonancia Exacta en R₂ = 5.00 Ω)');
+            }
+            syncFixedInputsFromState();
+            syncVariableSliderRange();
+            updateAll();
+        }
+
+        function copyFormulasToClipboard() {
+            const plainText = [
+                "RESUMEN DE FÓRMULAS - TP Nº 5: RESONANCIA Y LUGAR GEOMÉTRICO (R1-L // R2-C)",
+                "Condición general de resonancia (Im[Y_T] = 0):",
+                "X_L / (R1^2 + X_L^2) = X_C / (R2^2 + X_C^2)",
+                "",
+                "CASO 1 (R1 Variable, resto fijo):",
+                "Diámetro del semicírculo de admitancia: D_Y = 1 / X_L (sobre eje imaginario)",
+                "Valor de resonancia: R1 = sqrt( X_L * (R2^2 + X_C^2) / X_C - X_L^2 )",
+                "",
+                "CASO 2 (R2 Variable, resto fijo):",
+                "Diámetro del semicírculo de admitancia: D_Y = 1 / X_C (sobre eje imaginario)",
+                "Valor de resonancia: R2 = sqrt( X_C * (R1^2 + X_L^2) / X_L - X_C^2 )",
+                "",
+                "CASO 3 (L o X_L Variable, resto fijo):",
+                "Diámetro del semicírculo de admitancia: D_Y = 1 / R1 (sobre eje real), Radio = 1 / (2*R1)",
+                "Ecuación cuadrática: X_L^2 - (1 / B_C) * X_L + R1^2 = 0",
+                "",
+                "CASO 4 (C o X_C Variable, resto fijo):",
+                "Diámetro del semicírculo de admitancia: D_Y = 1 / R2 (sobre eje real), Radio = 1 / (2*R2)",
+                "Ecuación cuadrática: X_C^2 - (1 / |B_L|) * X_C + R2^2 = 0"
+            ].join("\n");
+
+            const temp = document.createElement("textarea");
+            temp.value = plainText;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand("copy");
+            document.body.removeChild(temp);
+            showToast("Fórmulas copiadas en texto plano listas para pegar en Word");
+        }
+
+        function resizeCanvases() {
+            ['canvas-locus', 'canvas-curves'].forEach(id => {
+                const c = document.getElementById(id);
+                if (c && c.parentElement) {
+                    c.width = c.parentElement.clientWidth;
+                    c.height = 360;
+                }
+            });
+        }
+
+        window.onload = function () {
+            resizeCanvases();
+            initCanvasInteractivity();
+            loadPreset('ej10'); // Start with Exercise 10 loaded by default
+            window.addEventListener('resize', () => {
+                resizeCanvases();
+                updateAll();
+            });
+        };
+    </script>
+</body>
+</html>
